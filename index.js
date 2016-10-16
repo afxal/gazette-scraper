@@ -1,10 +1,15 @@
-var request = require('request');
+var request = require('request')
+var cachedRequest = require('cached-request')(request);
 var cheerio = require('cheerio');
 var async = require('async');
 var express = require('express');
 var app = express()
 
+var cacheDirectory = "cache";
+cachedRequest.setCacheDirectory(cacheDirectory);
+
 var url = "http://www.gazette.gov.mv/v3/iulaan/search/all";
+
 
 app.get('/scrap', function(req, res){
   var pagenum = req.query.page_num || 1;
@@ -13,8 +18,9 @@ app.get('/scrap', function(req, res){
 
   async.waterfall([
     function getPage(fn){
-      request({
+      cachedRequest({
         url:url,
+        ttl: 900000,
         method:'POST',
         formData:{
           jobCategory:'all',
@@ -25,14 +31,17 @@ app.get('/scrap', function(req, res){
           recordsPerPage:recordsPerPage
         }
       }, function(err, res, body){
-      response = JSON.parse(body);
-      fn();
+        response = JSON.parse(body);
+        fn();
      })
     },
     function getDetails(fn){
       async.map(response.iulaans, function retrieveItem(item, done){
         var url = 'http://www.gazette.gov.mv/v3/iulaan/view/' + item.id;
-        request(url, function(err, res, body){
+        cachedRequest({
+          url:url,
+          ttl: 900000,
+        }, function(err, res, body){
           var $ = cheerio.load(body);
           var html = $(".il-details").html();
           item.html = html;
@@ -46,4 +55,4 @@ app.get('/scrap', function(req, res){
 });
 
 app.listen(3003)
-console.log("running at http://localhost:3003")
+console.log("Serving at http://localhost:3003")
