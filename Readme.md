@@ -1,6 +1,6 @@
 # Gazette Scrapper
 
-Simple gazette scrapper from gazette.gov.mv
+Simple gazette scrapper for gazette.gov.mv
 
 ## Installation
 
