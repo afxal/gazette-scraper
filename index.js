@@ -11,7 +11,7 @@ cachedRequest.setCacheDirectory(cacheDirectory);
 var url = "http://www.gazette.gov.mv/v3/iulaan/search/all";
 
 
-app.get('/scrap', function(req, res){
+app.get('/', function(req, res){
   var pagenum = req.query.page_num || 1;
   var recordsPerPage = req.query.limit || 10;
   var response;
