@@ -8,10 +8,10 @@ var app = express()
 var cacheDirectory = "cache";
 cachedRequest.setCacheDirectory(cacheDirectory);
 
-var url = "http://www.gazette.gov.mv/v3/iulaan/search/all";
+var url = 'http://www.gazette.gov.mv/v3/iulaan/';
 
 
-app.get('/scrap', function(req, res){
+app.get('/', function(req, res){
   var pagenum = req.query.page_num || 1;
   var recordsPerPage = req.query.limit || 10;
   var response;
@@ -19,7 +19,7 @@ app.get('/scrap', function(req, res){
   async.waterfall([
     function getPage(fn){
       cachedRequest({
-        url:url,
+        url:url+'search/all',
         ttl: 900000,
         method:'POST',
         formData:{
@@ -37,9 +37,8 @@ app.get('/scrap', function(req, res){
     },
     function getDetails(fn){
       async.map(response.iulaans, function retrieveItem(item, done){
-        var url = 'http://www.gazette.gov.mv/v3/iulaan/view/' + item.id;
         cachedRequest({
-          url:url,
+          url:url+'view/'+item.id,
           ttl: 900000,
         }, function(err, res, body){
           var $ = cheerio.load(body);
