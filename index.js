@@ -1,12 +1,32 @@
-var request = require('request')
-var cachedRequest = require('cached-request')(request);
-var cheerio = require('cheerio');
-var async = require('async');
-var express = require('express');
-var app = express()
+var request = require('request'),
+    cachedRequest = require('cached-request')(request),
+    cheerio = require('cheerio'),
+    async = require('async'),
+    express = require('express'),
+    app = express(),
+    env = require('dotenv').config(),
+    firebase = require('firebase');
 
 var cacheDirectory = "cache";
 cachedRequest.setCacheDirectory(cacheDirectory);
+
+
+
+  var config = {
+    apiKey: process.env.FB_API_KEY,
+    authDomain: process.env.FB_PROJECT_ID+".firebaseapp.com",
+    databaseURL: "https://"+ process.env.FB_DB_NAME +".firebaseio.com",
+    storageBucket: process.env.FB_BUCKET + ".appspot.com"
+  };
+  firebase.initializeApp(config);
+
+  // Get a reference to the database service
+  var database = firebase.database();
+
+
+function writeList(item) {
+  firebase.database().ref('list/' + item.id).set(item);
+}
 
 var url = 'http://www.gazette.gov.mv/v3/iulaan/';
 
@@ -41,10 +61,13 @@ app.get('/', function(req, res){
           url:url+'view/'+item.id,
           ttl: 900000,
         }, function(err, res, body){
-          var $ = cheerio.load(body);
+          var $ = cheerio.load(body, {decodeEntities: false});
           var html = $(".il-details").html();
           item.html = html;
+          item.text = html.replace(/(<([^>]+)>)/ig,"");
+          item.version = 2;
           done(null, item);
+          writeList(item);
         })
       },fn)
     }
