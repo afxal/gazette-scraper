@@ -35,7 +35,7 @@ function createDate(dateText) {
     var date = seperate[0].split(".");
     var hour = seperate[1].substring(0, 2);
     var minute = seperate[1].substring(2, 4);
-    return new Date(date[2], date[1], date[0], hour, minute);
+    return new Date(date[2], date[1], date[0], hour, minute).getTime();
   }else{
     return null
   }
