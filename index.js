@@ -28,6 +28,19 @@ function writeList(item) {
   firebase.database().ref('list/' + item.id).set(item);
 }
 
+
+function createDate(dateText) {
+  if (dateText) {
+    var seperate = dateText.split(" ");
+    var date = seperate[0].split(".");
+    var hour = seperate[1].substring(0, 2);
+    var minute = seperate[1].substring(2, 4);
+    return new Date(date[2], date[1], date[0], hour, minute);
+  }else{
+    return null
+  }
+}
+
 var url = 'http://www.gazette.gov.mv/v3/iulaan/';
 
 
@@ -65,6 +78,9 @@ app.get('/', function(req, res){
           var html = $(".il-details").html();
           item.html = html;
           item.text = html.replace(/(<([^>]+)>)/ig,"");
+          item.published_date = createDate(item.published_time);
+          item.removed_date = createDate(item.retracted_time);
+          item.due_date = createDate(item.due_time);
           item.version = 2;
           done(null, item);
           writeList(item);
